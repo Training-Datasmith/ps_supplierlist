@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
 * 2007-2016 PrestaShop
 *
@@ -35,7 +37,7 @@ class Ps_Supplierlist extends Module implements WidgetInterface
     /**
      * @var string Name of the module running on PS 1.6.x. Used for data migration.
      */
-    const PS_16_EQUIVALENT_MODULE = 'blocksupplier';
+    public const PS_16_EQUIVALENT_MODULE = 'blocksupplier';
 
     protected $templateFile;
 
@@ -219,9 +221,9 @@ class Ps_Supplierlist extends Module implements WidgetInterface
         $helper->identifier = $this->identifier;
         $helper->submit_action = 'submitBlockSuppliers';
         $helper->currentIndex = $this->context->link->getAdminLink(
-                'AdminModules',
-                false
-            ) .
+            'AdminModules',
+            false
+        ) .
             '&configure=' . $this->name .
             '&tab_module=' . $this->tab .
             '&module_name=' . $this->name;
