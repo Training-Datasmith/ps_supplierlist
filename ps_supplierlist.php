@@ -67,6 +67,11 @@ class Ps_Supplierlist extends Module implements WidgetInterface
         $this->templateFile = 'module:ps_supplierlist/views/templates/hook/ps_supplierlist.tpl';
     }
 
+    /**
+     * Installs the module, sets default configuration, and registers display and supplier-event hooks.
+     *
+     * @return bool True on success, false on failure
+     */
     public function install()
     {
         $this->uninstallPrestaShop16Module();
@@ -83,6 +88,11 @@ class Ps_Supplierlist extends Module implements WidgetInterface
             && $this->registerHook('actionObjectSupplierUpdateAfter');
     }
 
+    /**
+     * Uninstalls the module and removes all module-specific configuration keys.
+     *
+     * @return bool True on success, false on failure
+     */
     public function uninstall()
     {
         return parent::uninstall()
@@ -148,21 +158,51 @@ class Ps_Supplierlist extends Module implements WidgetInterface
         return $output . $this->renderForm();
     }
 
+    /**
+     * Clears the template cache when a supplier is updated.
+     *
+     * @param array $params Hook parameters including the updated supplier object
+     *
+     * @return void
+     */
     public function hookActionObjectSupplierUpdateAfter($params)
     {
         $this->_clearCache('*');
     }
 
+    /**
+     * Clears the template cache when a new supplier is added.
+     *
+     * @param array $params Hook parameters including the new supplier object
+     *
+     * @return void
+     */
     public function hookActionObjectSupplierAddAfter($params)
     {
         $this->_clearCache('*');
     }
 
+    /**
+     * Clears the template cache when a supplier is deleted.
+     *
+     * @param array $params Hook parameters including the deleted supplier object
+     *
+     * @return void
+     */
     public function hookActionObjectSupplierDeleteAfter($params)
     {
         $this->_clearCache('*');
     }
 
+    /**
+     * Clears the Smarty template cache for this module's template file.
+     *
+     * @param string      $template   Template name (ignored; always clears the module template)
+     * @param string|null $id_cache   Optional cache ID
+     * @param string|null $id_compile Optional compile ID
+     *
+     * @return bool
+     */
     public function _clearCache($template, $id_cache = null, $id_compile = null)
     {
         return parent::_clearCache($this->templateFile);
@@ -237,6 +277,11 @@ class Ps_Supplierlist extends Module implements WidgetInterface
         return $helper->generateForm([$fields_form]);
     }
 
+    /**
+     * Returns current configuration values for the module settings form.
+     *
+     * @return array{SUPPLIER_DISPLAY_TYPE: string, SUPPLIER_DISPLAY_TEXT_NB: int|string}
+     */
     public function getConfigFieldsValues()
     {
         return [
@@ -245,6 +290,15 @@ class Ps_Supplierlist extends Module implements WidgetInterface
         ];
     }
 
+    /**
+     * Renders the supplier list widget, using cached output when available.
+     * Returns nothing if supplier display is disabled in the back office.
+     *
+     * @param string $hookName    Name of the hook rendering this widget
+     * @param array  $configuration Hook configuration parameters
+     *
+     * @return string|null Rendered HTML of the supplier list, or null if suppliers are disabled
+     */
     public function renderWidget($hookName, array $configuration)
     {
         // If supplier listing is disabled in backoffice, we won't show this block.
@@ -263,6 +317,14 @@ class Ps_Supplierlist extends Module implements WidgetInterface
         return $this->fetch($this->templateFile, $cacheId);
     }
 
+    /**
+     * Returns template variables for the supplier list widget.
+     *
+     * @param string $hookName    Name of the hook rendering this widget
+     * @param array  $configuration Hook configuration parameters
+     *
+     * @return array<string, mixed> Template variable map including the supplier list and display settings
+     */
     public function getWidgetVariables($hookName, array $configuration)
     {
         $suppliers = Supplier::getSuppliers(
