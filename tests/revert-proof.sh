@@ -48,7 +48,7 @@ git -C "$REPO_ROOT" archive HEAD | tar -x -C "$EXPORT_DIR"
 
 case "$MUTATION_NAME" in
   supplier-row-link)
-    perl -0pi -e 's/getSupplierLink\(\$suppliers\[\$key\]\[\x27id_supplier\x27\]\)/getSupplierLink($suppliers[$key])/s' \
+    perl -pi -e 's/getSupplierLink\(\$suppliers\[\$key\]\[\x27id_supplier\x27\]\)/getSupplierLink(\$suppliers[\$key])/' \
       "$EXPORT_DIR/ps_supplierlist.php"
     ;;
   remove-display-guard)
@@ -56,7 +56,7 @@ case "$MUTATION_NAME" in
       "$EXPORT_DIR/ps_supplierlist.php"
     ;;
   remove-right-hook)
-    perl -0pi -e 's/&& \$this->registerHook\(\x27displayRightColumn\x27\)//' \
+    perl -pi -e 's/ && \$this->registerHook\(\x27displayRightColumn\x27\)//' \
       "$EXPORT_DIR/ps_supplierlist.php"
     ;;
   *)
@@ -85,8 +85,8 @@ php -d error_reporting=-1 -d display_errors=1 -d display_startup_errors=1 -d log
 code=\${PIPESTATUS[0]}
 set -e
 OUT=\"\$(cat /work/proof.out)\"
-echo \"\$OUT\" | grep -q 'There was 1 error' && exit 3
-echo \"\$OUT\" | grep -q 'There were' && echo \"\$OUT\" | grep -q 'error' && exit 3
+echo \"\$OUT\" | grep -qi 'There was 1 error' && exit 3
+echo \"\$OUT\" | grep -qi 'There were' && echo \"\$OUT\" | grep -qi 'error' && exit 3
 echo \"\$OUT\" | grep -Eq 'Failures: [1-9]' || exit 4
 [ \"\$code\" -ne 0 ] || exit 5
 "
