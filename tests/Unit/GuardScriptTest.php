@@ -138,9 +138,9 @@ class GuardScriptTest extends SupplierListTestCase
 
         $combined = $stdout . $stderr;
         $this->assertNoPhpDiagnostic($combined);
+        $this->assertNotContains('AFTER', $combined);
         $this->assertSame(0, $exitCode);
         $this->assertSame('', $stdout);
         $this->assertSame('', $stderr);
-        $this->assertNotContains('AFTER', $combined);
     }
 }

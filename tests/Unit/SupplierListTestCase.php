@@ -41,9 +41,9 @@ class SupplierListTestCase extends PHPUnit_Framework_TestCase
 
     protected function assertNoPhpDiagnostic($text, $message = '')
     {
-        $this->assertInternalType('string', (string) $text, $message);
+        $this->assertInternalType('string', $text, $message);
         $pattern = '/(Notice:|Warning:|Deprecated:|Strict Standards:|Parse error:|Fatal error:)/';
-        $this->assertSame(0, preg_match($pattern, (string) $text), $message);
+        $this->assertSame(0, preg_match($pattern, $text), $message);
     }
 
     protected function repoRoot()
