@@ -2,6 +2,8 @@
 
 class GuardScriptTest extends SupplierListTestCase
 {
+    private $sentinelPaths = array();
+
     private static $guardFiles = array(
         'index.php',
         'tests/doubles/index.php',
@@ -15,6 +17,17 @@ class GuardScriptTest extends SupplierListTestCase
         'views/templates/index.php',
     );
 
+    protected function tearDown()
+    {
+        foreach ($this->sentinelPaths as $path) {
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
+        $this->sentinelPaths = array();
+        parent::tearDown();
+    }
+
     /**
      * @dataProvider guardFileProvider
      */
@@ -24,6 +37,7 @@ class GuardScriptTest extends SupplierListTestCase
         $this->assertFileExists($absolute);
         $sentinel = tempnam(sys_get_temp_dir(), 'guard-sentinel-');
         $this->assertInternalType('string', $sentinel);
+        $this->sentinelPaths[] = $sentinel;
 
         $runner = $this->repoRoot() . '/tests/Unit/guard-child.php';
         $cmd = 'php -d error_reporting=-1 -d display_errors=1 -d display_startup_errors=1 -d log_errors=0 '
@@ -45,10 +59,10 @@ class GuardScriptTest extends SupplierListTestCase
         fclose($pipes[2]);
         $exitCode = proc_close($process);
 
+        $this->assertNoPhpDiagnostic($stdout . $stderr);
         $this->assertSame(0, $exitCode);
         $this->assertSame('', $stdout);
         $this->assertSame('', $stderr);
-        $this->assertNoPhpDiagnostic($stdout . $stderr);
         $this->assertFileExists($sentinel);
         $content = file_get_contents($sentinel);
         $this->assertInternalType('string', $content);
@@ -68,8 +82,6 @@ class GuardScriptTest extends SupplierListTestCase
         $this->assertTrue($hasHeader);
         $this->assertTrue($hasExit);
         $this->assertContains("header('Location: ../');", file_get_contents($absolute));
-
-        @unlink($sentinel);
     }
 
     public function guardFileProvider()
@@ -124,10 +136,11 @@ class GuardScriptTest extends SupplierListTestCase
         fclose($pipes[2]);
         $exitCode = proc_close($process);
 
+        $combined = $stdout . $stderr;
+        $this->assertNoPhpDiagnostic($combined);
         $this->assertSame(0, $exitCode);
         $this->assertSame('', $stdout);
         $this->assertSame('', $stderr);
-        $this->assertNoPhpDiagnostic($stdout . $stderr);
-        $this->assertNotContains('AFTER', $stdout . $stderr);
+        $this->assertNotContains('AFTER', $combined);
     }
 }

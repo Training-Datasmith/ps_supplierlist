@@ -41,7 +41,7 @@ class SupplierListTestCase extends PHPUnit_Framework_TestCase
 
     protected function assertNoPhpDiagnostic($text, $message = '')
     {
-        $this->assertIsStringNonEmpty($message === '' ? 'diagnostic scan subject' : $message);
+        $this->assertInternalType('string', (string) $text, $message);
         $pattern = '/(Notice:|Warning:|Deprecated:|Strict Standards:|Parse error:|Fatal error:)/';
         $this->assertSame(0, preg_match($pattern, (string) $text), $message);
     }

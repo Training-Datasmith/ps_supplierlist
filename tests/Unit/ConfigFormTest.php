@@ -66,6 +66,10 @@ class ConfigFormTest extends SupplierListTestCase
         $html = $module->renderForm();
         $this->assertSame('HELPER_FORM_HTML', $html);
 
+        $this->assertInternalType('array', HelperForm::$lastConfig);
+        $this->assertArrayHasKey('show_toolbar', HelperForm::$lastConfig);
+        $this->assertArrayHasKey('tpl_vars', HelperForm::$lastConfig);
+        $this->assertArrayHasKey('fields_value', HelperForm::$lastConfig['tpl_vars']);
         $this->assertFalse(HelperForm::$lastConfig['show_toolbar']);
         $this->assertSame('module', HelperForm::$lastConfig['table']);
         $this->assertSame('id_module', HelperForm::$lastConfig['identifier']);
@@ -75,6 +79,8 @@ class ConfigFormTest extends SupplierListTestCase
         $this->assertSame('supplier_text', HelperForm::$lastConfig['tpl_vars']['fields_value']['SUPPLIER_DISPLAY_TYPE']);
         $this->assertSame('5', HelperForm::$lastConfig['tpl_vars']['fields_value']['SUPPLIER_DISPLAY_TEXT_NB']);
 
+        $this->assertInternalType('array', HelperForm::$lastFields);
+        $this->assertArrayHasKey(0, HelperForm::$lastFields);
         $form = HelperForm::$lastFields[0]['form'];
         $this->assertSame('Settings', $form['legend']['title']);
         $this->assertSame('Save', $form['submit']['title']);
@@ -114,9 +120,12 @@ class ConfigFormTest extends SupplierListTestCase
         $this->assertCount(1, Link::$adminCalls);
         $this->assertSame('AdminModules', Link::$adminCalls[0]['controller']);
         $this->assertFalse(Link::$adminCalls[0]['withToken']);
-        $this->assertContains('configure=ps_supplierlist', HelperForm::$lastConfig['currentIndex']);
-        $this->assertContains('tab_module=front_office_features', HelperForm::$lastConfig['currentIndex']);
-        $this->assertContains('module_name=ps_supplierlist', HelperForm::$lastConfig['currentIndex']);
+        $expectedIndex = 'LINK-ADMIN-AdminModules-notoken'
+            . '&configure=ps_supplierlist'
+            . '&tab_module=front_office_features'
+            . '&module_name=ps_supplierlist';
+        $this->assertArrayHasKey('currentIndex', HelperForm::$lastConfig);
+        $this->assertSame($expectedIndex, HelperForm::$lastConfig['currentIndex']);
         $this->assertCount(1, Link::$tokenCalls);
         $this->assertSame('AdminModules', Link::$tokenCalls[0]['tab']);
         $this->assertSame('TOKEN-AdminModules', HelperForm::$lastConfig['token']);

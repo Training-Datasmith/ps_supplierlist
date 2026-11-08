@@ -22,8 +22,16 @@ class GetContentTest extends SupplierListTestCase
         $this->assertContains('alert alert-success', $output);
         $updates = Configuration::getUpdates();
         $this->assertCount(2, $updates);
-        $this->assertSame('supplier_text', $updates[0]['value']);
-        $this->assertSame(5, $updates[1]['value']);
+        $saved = array();
+        foreach ($updates as $update) {
+            $this->assertArrayHasKey('key', $update);
+            $this->assertArrayHasKey('value', $update);
+            $saved[$update['key']] = $update['value'];
+        }
+        $this->assertArrayHasKey('SUPPLIER_DISPLAY_TYPE', $saved);
+        $this->assertArrayHasKey('SUPPLIER_DISPLAY_TEXT_NB', $saved);
+        $this->assertSame('supplier_text', $saved['SUPPLIER_DISPLAY_TYPE']);
+        $this->assertSame(5, $saved['SUPPLIER_DISPLAY_TEXT_NB']);
         $this->assertCount(1, Module::$clearCacheCalls);
         $this->assertSame($this->moduleTemplate(), Module::$clearCacheCalls[0]['template']);
     }
@@ -34,10 +42,18 @@ class GetContentTest extends SupplierListTestCase
         $_POST['SUPPLIER_DISPLAY_TYPE'] = 'supplier_form';
         $_POST['SUPPLIER_DISPLAY_TEXT_NB'] = '12';
         $module = new Ps_SupplierlistFormStub();
-        $this->assertTrue((bool) strpos($module->getContent(), 'The settings have been updated.'));
+        $output = $module->getContent();
+        $this->assertContains('The settings have been updated.', $output);
         $updates = Configuration::getUpdates();
-        $this->assertSame('supplier_form', $updates[0]['value']);
-        $this->assertSame(12, $updates[1]['value']);
+        $this->assertCount(2, $updates);
+        $saved = array();
+        foreach ($updates as $update) {
+            $this->assertArrayHasKey('key', $update);
+            $this->assertArrayHasKey('value', $update);
+            $saved[$update['key']] = $update['value'];
+        }
+        $this->assertSame('supplier_form', $saved['SUPPLIER_DISPLAY_TYPE']);
+        $this->assertSame(12, $saved['SUPPLIER_DISPLAY_TEXT_NB']);
     }
 
     /**

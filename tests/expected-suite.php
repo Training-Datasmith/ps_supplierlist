@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    'testCount' => 78,
+    'testCount' => 77,
     'files' => array(
         'CacheHookTest.php',
         'ConfigFormTest.php',

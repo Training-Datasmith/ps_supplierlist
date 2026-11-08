@@ -213,7 +213,7 @@ class Language
 
     public function __construct($id)
     {
-        $this->id = $id;
+        $this->id = (int) $id;
     }
 }
 
@@ -245,17 +245,9 @@ class Supplier
         $p = false,
         $n = false,
         $allGroups = false,
-        $withProduct = true
+        $withProduct = false
     ) {
-        self::$lastCall = array(
-            $getNbProducts,
-            $idLang,
-            $active,
-            $p,
-            $n,
-            $allGroups,
-            $withProduct,
-        );
+        self::$lastCall = func_get_args();
         ++self::$callCount;
 
         return self::$rows;
@@ -465,7 +457,9 @@ class Module
     public static $installedModules = array();
     public static $moduleInstances = array();
     public static $registerHookResults = array();
+    public static $registerHookFailures = array();
     public static $registeredHooks = array();
+    public static $lastUninstallInstance = null;
     public static $clearCacheCalls = array();
     public static $fetchCalls = array();
     public static $cachedMap = array();
@@ -488,7 +482,9 @@ class Module
         self::$installedModules = array();
         self::$moduleInstances = array();
         self::$registerHookResults = array();
+        self::$registerHookFailures = array();
         self::$registeredHooks = array();
+        self::$lastUninstallInstance = null;
         self::$clearCacheCalls = array();
         self::$fetchCalls = array();
         self::$cachedMap = array();
@@ -508,6 +504,11 @@ class Module
     public static function setRegisterHookResults(array $results)
     {
         self::$registerHookResults = array_values($results);
+    }
+
+    public static function setRegisterHookFailures(array $hookNames)
+    {
+        self::$registerHookFailures = array_values($hookNames);
     }
 
     public static function isInstalled($name)
@@ -536,12 +537,21 @@ class Module
     public function uninstall()
     {
         ++self::$parentUninstallCount;
+        self::$lastUninstallInstance = $this;
 
         return self::$parentUninstallResult;
     }
 
     public function registerHook($hook_name, $shop_list = null)
     {
+        if (!is_numeric($this->id)) {
+            return false;
+        }
+
+        if (in_array($hook_name, self::$registerHookFailures, true)) {
+            return false;
+        }
+
         $result = true;
         if (count(self::$registerHookResults) > 0) {
             $result = (bool) array_shift(self::$registerHookResults);

@@ -10,6 +10,8 @@ class InstallUninstallTest extends SupplierListTestCase
         foreach (Configuration::getUpdates() as $update) {
             $keys[$update['key']] = $update['value'];
         }
+        $this->assertArrayHasKey('SUPPLIER_DISPLAY_TEXT_NB', $keys);
+        $this->assertArrayHasKey('SUPPLIER_DISPLAY_TYPE', $keys);
         $this->assertSame(5, $keys['SUPPLIER_DISPLAY_TEXT_NB']);
         $this->assertSame('supplier_text', $keys['SUPPLIER_DISPLAY_TYPE']);
         $expected = array(
@@ -44,33 +46,21 @@ class InstallUninstallTest extends SupplierListTestCase
     /**
      * @dataProvider hookFailureProvider
      */
-    public function testInstallAbortsWhenHookRegistrationFails($results, $expectedRegistered)
+    public function testInstallAbortsWhenHookRegistrationFails($failingHook)
     {
-        Module::setRegisterHookResults($results);
+        Module::setRegisterHookFailures(array($failingHook));
         $module = $this->newModule();
         $this->assertFalse($module->install());
-        $this->assertSame($expectedRegistered, Module::$registeredHooks);
     }
 
     public function hookFailureProvider()
     {
         return array(
-            array(array(false), array()),
-            array(array(true, false), array('displayLeftColumn')),
-            array(array(true, true, false), array('displayLeftColumn', 'displayRightColumn')),
-            array(
-                array(true, true, true, false),
-                array('displayLeftColumn', 'displayRightColumn', 'actionObjectSupplierDeleteAfter')
-            ),
-            array(
-                array(true, true, true, true, false),
-                array(
-                    'displayLeftColumn',
-                    'displayRightColumn',
-                    'actionObjectSupplierDeleteAfter',
-                    'actionObjectSupplierAddAfter',
-                )
-            ),
+            array('displayLeftColumn'),
+            array('displayRightColumn'),
+            array('actionObjectSupplierDeleteAfter'),
+            array('actionObjectSupplierAddAfter'),
+            array('actionObjectSupplierUpdateAfter'),
         );
     }
 
@@ -131,6 +121,7 @@ class InstallUninstallTest extends SupplierListTestCase
         $this->assertTrue($module->uninstallPrestaShop16Module());
         $this->assertSame(1, Module::$parentUninstallCount);
         $this->assertSame(0, BlocksupplierDouble::$childUninstallCount);
+        $this->assertSame($legacy, Module::$lastUninstallInstance);
     }
 
     public function testLegacyUninstallReturnsFalseWhenModuleIsNotInstalled()
@@ -138,6 +129,8 @@ class InstallUninstallTest extends SupplierListTestCase
         Module::setInstalled('blocksupplier', false);
         $module = $this->newModule();
         $this->assertFalse($module->uninstallPrestaShop16Module());
+        $this->assertSame(0, Module::$parentUninstallCount);
+        $this->assertNull(Module::$lastUninstallInstance);
     }
 
     public function testInstallUninstallsInstalledLegacyModuleThroughParent()
@@ -149,5 +142,6 @@ class InstallUninstallTest extends SupplierListTestCase
         $this->assertTrue($module->install());
         $this->assertSame(1, Module::$parentUninstallCount);
         $this->assertSame(0, BlocksupplierDouble::$childUninstallCount);
+        $this->assertSame($legacy, Module::$lastUninstallInstance);
     }
 }

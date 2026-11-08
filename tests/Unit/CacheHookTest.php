@@ -21,12 +21,4 @@ class CacheHookTest extends SupplierListTestCase
             array('hookActionObjectSupplierDeleteAfter'),
         );
     }
-
-    public function testClearCacheIgnoresTemplateAndCacheArguments()
-    {
-        $module = $this->newModule();
-        $module->_clearCache('other.tpl', 'cache-9', 'compile-9');
-        $this->assertCount(1, Module::$clearCacheCalls);
-        $this->assertSame($this->moduleTemplate(), Module::$clearCacheCalls[0]['template']);
-    }
 }

@@ -5,7 +5,7 @@ if ($argc < 3) {
 $target = $argv[1];
 $sentinel = $argv[2];
 register_shutdown_function(function () use ($sentinel) {
-    file_put_contents($sentinel, 'shutdown');
+    file_put_contents($sentinel, 'shutdown', FILE_APPEND);
 });
 include $target;
 file_put_contents($sentinel, 'continued', FILE_APPEND);

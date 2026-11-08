@@ -43,18 +43,22 @@ class TemplateContractTest extends SupplierListTestCase
     public function testTextPartialLimitsVisibleSuppliers()
     {
         $contents = $this->normalizedTemplate('views/templates/_partials/supplier_text.tpl');
-        $this->assertContains('{foreach from=$suppliers item=supplier name=supplier_list}', $contents);
+        $this->assertRegExp(
+            '/\{foreach[^}]*from=\$suppliers[^}]*item=supplier[^}]*name=supplier_list[^}]*\}/',
+            $contents
+        );
         $this->assertContains('$smarty.foreach.supplier_list.iteration <= $text_list_nb', $contents);
-        $this->assertContains('{$supplier[\'link\']}', $contents);
-        $this->assertContains('{$supplier[\'name\']}', $contents);
+        $this->assertRegExp('/\{\$supplier\[\'link\'\](\|[^}]*)?\}/', $contents);
+        $this->assertRegExp('/\{\$supplier\[\'name\'\](\|[^}]*)?\}/', $contents);
     }
 
     public function testDropdownPartialListsEverySupplier()
     {
         $contents = $this->normalizedTemplate('views/templates/_partials/supplier_form.tpl');
-        $this->assertContains('{foreach from=$suppliers item=supplier}', $contents);
+        $this->assertRegExp('/\{foreach[^}]*from=\$suppliers[^}]*item=supplier[^}]*\}/', $contents);
         $this->assertContains('All suppliers', $contents);
-        $this->assertContains('{$supplier[\'link\']}', $contents);
+        $this->assertRegExp('/\{\$supplier\[\'link\'\](\|[^}]*)?\}/', $contents);
+        $this->assertRegExp('/\{\$supplier\[\'name\'\](\|[^}]*)?\}/', $contents);
         $this->assertNotContains('text_list_nb', $contents);
     }
 
